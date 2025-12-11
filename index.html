@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Control de Temperatura</title>
+<style>
+body { font-family: Arial; padding: 20px; }
+button { padding: 12px; margin: 10px; font-size: 18px; }
+#panel { display:none; }
+</style>
+</head>
+<body>
+
+<h2>Control de LEDs y Temperatura</h2>
+
+<div id="login">
+  <h3>Ingrese contraseña:</h3>
+  <input type="password" id="pass">
+  <button onclick="login()">Entrar</button>
+</div>
+
+<div id="panel">
+  <h3>Temperatura promedio: <span id="promedio">---</span> °C</h3>
+
+  <h3>Modo:</h3>
+  <button onclick="setMode('AUTO')">Automático</button>
+  <button onclick="setMode('HIGH')">Prender LED >28</button>
+  <button onclick="setMode('LOW')">Prender LED <23</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+
+// --------- TU CONFIGURACIÓN FIREBASE --------- //
+const firebaseConfig = {
+  apiKey: "AIzaSyAInFQitsZNoWBJ0_Ss7Y2TBBRLWUtTaZk",
+  authDomain: "la-ultimita-y-nos-vamos.firebaseapp.com",
+  databaseURL: "https://la-ultimita-y-nos-vamos-default-rtdb.firebaseio.com",
+  projectId: "la-ultimita-y-nos-vamos",
+  storageBucket: "la-ultimita-y-nos-vamos.firebasestorage.app",
+  messagingSenderId: "700588008744",
+  appId: "1:700588008744:web:f4535e24e1c48400d5dc1d",
+  measurementId: "G-GKH5J8CMMZ"
+};
+// ---------------------------------------------- //
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getDatabase(app);
+
+// Login simple
+function login() {
+  let p = document.getElementById("pass").value;
+  if (p == "1234") {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("panel").style.display = "block";
+  } else {
+    alert("Contraseña incorrecta");
+  }
+}
+window.login = login;
+
+// Cambiar modo
+function setMode(modo) {
+  set(ref(db, "control/mode"), modo);
+}
+window.setMode = setMode;
+
+// Leer temperatura promedio en tiempo real
+onValue(ref(db, "sensores/promedio"), (snapshot) => {
+  if (snapshot.exists()) {
+    document.getElementById("promedio").innerText = snapshot.val().toFixed(2);
+  }
+});
+</script>
+
+</body>
+</html>
